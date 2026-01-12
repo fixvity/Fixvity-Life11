@@ -98,6 +98,12 @@ th{
   font-weight:600;
 }
 
+.note{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:8px;
+}
+
 @media print{
   body{background:#fff}
   input,select,button{display:none!important}
@@ -136,6 +142,10 @@ th{
   </div>
 </div>
 
+<div class="note">
+• If both marks and letter grade are entered, marks will be used.
+</div>
+
 <br>
 <button onclick="calculateGrade()">Calculate Grade</button>
 <button onclick="window.print()">🖨️ Print</button>
@@ -146,7 +156,7 @@ th{
 </div>
 
 <script>
-/* ---------- GRADE STANDARDS ---------- */
+/* ---------- GRADE STANDARDS (US 4.0 SCALE) ---------- */
 const gradeScale=[
   {min:97,grade:"A+",gpa:4.0},
   {min:93,grade:"A",gpa:4.0},
@@ -171,6 +181,15 @@ const letterMap={
   "F":{p:0,g:0.0}
 };
 
+/* ---------- AUTO CLEAR INPUTS ---------- */
+document.getElementById("marks").addEventListener("input",()=>{
+  document.getElementById("letter").value="";
+});
+document.getElementById("letter").addEventListener("change",()=>{
+  document.getElementById("marks").value="";
+});
+
+/* ---------- CALCULATION ---------- */
 function calculateGrade(){
   const out=document.getElementById("output");
   out.innerHTML="";
