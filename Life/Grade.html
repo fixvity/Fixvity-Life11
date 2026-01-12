@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grade Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --primary:#2563eb;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --radius:14px;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+.container{max-width:960px;margin:auto;padding:16px}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:0 12px 28px rgba(0,0,0,.08);
+  margin-bottom:22px;
+  padding:20px;
+}
+h1,h3{margin:0;color:var(--primary)}
+small{color:var(--muted)}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+label{font-size:14px;margin-bottom:6px;display:block}
+
+input,select{
+  width:100%;
+  height:48px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-size:15px;
+}
+
+button{
+  height:52px;
+  padding:0 20px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  margin-right:8px;
+}
+
+.result{
+  margin-top:16px;
+  background:#f9fafb;
+  border-radius:12px;
+  padding:16px;
+}
+
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:#e0e7ff;
+  color:#1e3a8a;
+  font-size:14px;
+  margin:6px 6px 0 0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:14px;
+  font-size:14px;
+}
+th,td{
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #e5e7eb;
+}
+th{
+  background:#e0e7ff;
+  color:#1e3a8a;
+}
+
+.warning{
+  color:#b91c1c;
+  font-weight:600;
+}
+
+@media print{
+  body{background:#fff}
+  input,select,button{display:none!important}
+  .card{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="card">
+<h1>📘 Grade Calculator</h1>
+<small>Global standard · Accurate grade, percentage & GPA calculation</small>
+</div>
+
+<div class="card">
+<h3>Student Marks</h3>
+
+<div class="grid">
+  <div>
+    <label>Enter Marks (0–100)</label>
+    <input type="number" id="marks" placeholder="e.g. 85" min="0" max="100">
+  </div>
+
+  <div>
+    <label>OR Select Letter Grade</label>
+    <select id="letter">
+      <option value="">-- Optional --</option>
+      <option>A+</option><option>A</option><option>A-</option>
+      <option>B+</option><option>B</option><option>B-</option>
+      <option>C+</option><option>C</option><option>C-</option>
+      <option>D+</option><option>D</option><option>D-</option>
+      <option>F</option>
+    </select>
+  </div>
+</div>
+
+<br>
+<button onclick="calculateGrade()">Calculate Grade</button>
+<button onclick="window.print()">🖨️ Print</button>
+
+<div id="output" class="result">Enter marks or select a grade.</div>
+</div>
+
+</div>
+
+<script>
+/* ---------- GRADE STANDARDS ---------- */
+const gradeScale=[
+  {min:97,grade:"A+",gpa:4.0},
+  {min:93,grade:"A",gpa:4.0},
+  {min:90,grade:"A-",gpa:3.7},
+  {min:87,grade:"B+",gpa:3.3},
+  {min:83,grade:"B",gpa:3.0},
+  {min:80,grade:"B-",gpa:2.7},
+  {min:77,grade:"C+",gpa:2.3},
+  {min:73,grade:"C",gpa:2.0},
+  {min:70,grade:"C-",gpa:1.7},
+  {min:67,grade:"D+",gpa:1.3},
+  {min:63,grade:"D",gpa:1.0},
+  {min:60,grade:"D-",gpa:0.7},
+  {min:0,grade:"F",gpa:0.0}
+];
+
+const letterMap={
+  "A+":{p:97,g:4.0},"A":{p:93,g:4.0},"A-":{p:90,g:3.7},
+  "B+":{p:87,g:3.3},"B":{p:83,g:3.0},"B-":{p:80,g:2.7},
+  "C+":{p:77,g:2.3},"C":{p:73,g:2.0},"C-":{p:70,g:1.7},
+  "D+":{p:67,g:1.3},"D":{p:63,g:1.0},"D-":{p:60,g:0.7},
+  "F":{p:0,g:0.0}
+};
+
+function calculateGrade(){
+  const out=document.getElementById("output");
+  out.innerHTML="";
+
+  const marksVal=parseFloat(document.getElementById("marks").value);
+  const letterVal=document.getElementById("letter").value;
+
+  let percent,grade,gpa;
+
+  if(!isNaN(marksVal)){
+    if(marksVal<0||marksVal>100){
+      out.innerHTML="<span class='warning'>Marks must be between 0 and 100.</span>";
+      return;
+    }
+    for(const r of gradeScale){
+      if(marksVal>=r.min){
+        percent=marksVal;
+        grade=r.grade;
+        gpa=r.gpa;
+        break;
+      }
+    }
+  }
+  else if(letterVal){
+    percent=letterMap[letterVal].p;
+    grade=letterVal;
+    gpa=letterMap[letterVal].g;
+  }
+  else{
+    out.innerHTML="<span class='warning'>Enter marks or select a grade.</span>";
+    return;
+  }
+
+  const result =
+    gpa>=3.7?"First Class / Honors":
+    gpa>=3.3?"Upper Second Class":
+    gpa>=3.0?"Second Class":
+    gpa>=2.0?"Pass":
+    "Below Pass";
+
+  out.innerHTML=`
+    <span class="badge">Percentage: ${percent.toFixed(1)}%</span>
+    <span class="badge">Grade: ${grade}</span>
+    <span class="badge">GPA (4.0): ${gpa.toFixed(2)}</span>
+    <span class="badge">${result}</span>
+
+    <table>
+      <tr><th>Percentage</th><td>${percent.toFixed(1)}%</td></tr>
+      <tr><th>Letter Grade</th><td>${grade}</td></tr>
+      <tr><th>GPA (4.0)</th><td>${gpa.toFixed(2)}</td></tr>
+      <tr><th>Result</th><td>${result}</td></tr>
+    </table>
+  `;
+}
+</script>
+
+</body>
+</html>
